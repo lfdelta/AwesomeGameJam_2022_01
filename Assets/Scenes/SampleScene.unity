@@ -353,7 +353,7 @@ MonoBehaviour:
   TargetObj: {fileID: 1712289494}
   MinOffsetFraction: 0
   MaxOffsetFraction: 0.7
-  MaxOffsetMoveSpeed: 0.1
+  MaxOffsetMoveSpeed: 100
   SpeedForMaxOffsetFraction: 400
 --- !u!114 &519420034
 MonoBehaviour:

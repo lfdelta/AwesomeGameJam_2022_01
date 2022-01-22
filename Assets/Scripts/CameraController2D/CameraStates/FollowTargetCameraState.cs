@@ -47,17 +47,16 @@ public class FollowTargetCameraState : CameraState
             worldOffset.x = (2.0f * Controller.CameraObj.orthographicSize * screenOffset.x);
             worldOffset.y = (2.0f * Controller.CameraObj.orthographicSize / Controller.CameraObj.aspect * screenOffset.y);
 
-			// TODO: Smooth the transition when the player's velocity suddenly changes
-			//Vector2 offsetDelta = worldOffset - LastWorldOffset;
-			//float maxMoveDist = MaxOffsetMoveSpeed * Time.deltaTime;
-            //Debug.Log($"{maxMoveDist}");
-			//if (offsetDelta.magnitude > maxMoveDist)
-			//{
-			//	worldOffset += offsetDelta.normalized * maxMoveDist;
-			//}
-			//LastWorldOffset = worldOffset;
+            // Smooth the transition when the player's velocity suddenly changes
+            Vector2 changeInOffset = worldOffset - LastWorldOffset;
+            float maxMoveDist = MaxOffsetMoveSpeed * Time.deltaTime;
+            if (changeInOffset.magnitude > maxMoveDist)
+			{
+                worldOffset = LastWorldOffset + (changeInOffset.normalized * maxMoveDist);
+			}
+			LastWorldOffset = worldOffset;
 			targetPos += new Vector3(worldOffset.x, worldOffset.y, 0.0f);
-        }
+		}
         Controller.CameraObj.transform.position = new Vector3(targetPos.x, targetPos.y, camPos.z);
         return null;
     }

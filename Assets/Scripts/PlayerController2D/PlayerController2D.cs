@@ -24,6 +24,7 @@ public class PlayerController2D : MonoBehaviour
     private Rigidbody2D Rbody;
     private Collider2D ColliderObj;
     private LineRenderer LineRenderComp;
+    private DistanceJoint2D SwingJoint;
     private Vector2 MoveInputDir = Vector2.zero;
     private Vector2 AimDir = Vector2.right;
     private int NumJumpsRemaining = 0;
@@ -49,7 +50,16 @@ public class PlayerController2D : MonoBehaviour
     {
         Rbody = GetComponent<Rigidbody2D>();
         ColliderObj = GetComponent<Collider2D>();
+
         LineRenderComp = GetComponent<LineRenderer>();
+        LineRenderComp.colorGradient.mode = GradientMode.Fixed;
+
+        SwingJoint = gameObject.AddComponent<DistanceJoint2D>();
+        SwingJoint.enabled = false;
+        SwingJoint.enableCollision = true;
+        SwingJoint.autoConfigureDistance = false;
+        SwingJoint.maxDistanceOnly = false;
+
         State = GetIsGrounded() ? EPlayerState.Grounded : EPlayerState.Freefall;
     }
 
@@ -101,6 +111,9 @@ public class PlayerController2D : MonoBehaviour
         if (State != EPlayerState.Swinging && SwingInfo.AttachPointValid)
         {
             State = EPlayerState.Swinging;
+            SwingJoint.enabled = true;
+            SwingJoint.connectedAnchor = SwingInfo.WorldAttachPoint;
+            SwingJoint.distance = (SwingInfo.WorldAttachPoint - new Vector2(transform.position.x, transform.position.y)).magnitude;
         }
 	}
 
@@ -108,6 +121,7 @@ public class PlayerController2D : MonoBehaviour
 	{
         if (State == EPlayerState.Swinging)
 		{
+            SwingJoint.enabled = false;
             State = GetIsGrounded() ? EPlayerState.Grounded : EPlayerState.Freefall;
 		}
 	}
@@ -123,6 +137,12 @@ public class PlayerController2D : MonoBehaviour
     // FixedUpdate is called once per physics tick
 	void FixedUpdate()
 	{
+        if (State == EPlayerState.Swinging)
+		{
+            // Player is FULLY controlled by gravity, with no motion input
+            return;
+		}
+
         // Detect transition between jumping up and falling down
         if (State == EPlayerState.Freefall && IsJumpingUp && Rbody.velocity.y < 0.0f)
         {
@@ -139,14 +159,12 @@ public class PlayerController2D : MonoBehaviour
                 State = EPlayerState.Grounded;
                 NumJumpsRemaining = NumJumps;
                 Rbody.gravityScale = 1.0f;
-                Debug.Log("Becoming grounded");
             }
             else if (NumJumps > 0 && NumJumpsRemaining == NumJumps)
             {
                 State = EPlayerState.Freefall;
                 // Remove the "first jump" if the player runs off a ledge
                 --NumJumpsRemaining;
-                Debug.Log("Running off ledge");
             }
             IsGrounded = newIsGrounded;
         }
@@ -190,7 +208,11 @@ public class PlayerController2D : MonoBehaviour
     {
         if (State == EPlayerState.Swinging)
         {
-            // TODO: render based on anchor point
+            // Render current swing joint
+            Color lineColor = Color.white;
+            LineRenderComp.startColor = lineColor;
+            LineRenderComp.endColor = lineColor;
+            LineRenderComp.SetPositions(new Vector3[] { gameObject.transform.position, SwingInfo.WorldAttachPoint });
         }
         else
         {
@@ -209,24 +231,22 @@ public class PlayerController2D : MonoBehaviour
                     break;
 				}
 			}
-
             // Render the sight-line for the swing
             Vector3 aimOffset = new Vector3(AimDir.x, AimDir.y, 0.0f) * MaxSwingRadius;
             Color lineColor = (SwingInfo.AttachPointValid) ? Color.green : Color.red;
-            LineRenderComp.colorGradient.mode = GradientMode.Fixed;
             LineRenderComp.startColor = lineColor;
             LineRenderComp.endColor = lineColor;
             LineRenderComp.SetPositions(new Vector3[] { gameObject.transform.position, gameObject.transform.position + aimOffset });
-
-            if (SwingInfo.AttachPointValid)
-			{
-                SwingPointMarker.enabled = true;
-                SwingPointMarker.transform.position = new Vector3(SwingInfo.WorldAttachPoint.x, SwingInfo.WorldAttachPoint.y, 0.0f);
-			}
-            else
-			{
-                SwingPointMarker.enabled = false;
-			}
+        }
+        // Render swing attach point, if applicable
+        if (SwingInfo.AttachPointValid)
+        {
+            SwingPointMarker.enabled = true;
+            SwingPointMarker.transform.position = new Vector3(SwingInfo.WorldAttachPoint.x, SwingInfo.WorldAttachPoint.y, 0.0f);
+        }
+        else
+        {
+            SwingPointMarker.enabled = false;
         }
     }
 }

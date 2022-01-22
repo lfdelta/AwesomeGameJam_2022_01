@@ -18,6 +18,7 @@ public class PlayerController2D : MonoBehaviour
 	{
         public bool AttachPointValid = false;
         public Vector2 WorldAttachPoint = Vector2.zero;
+        public List<Vector2> PreviousAttachPoints = new List<Vector2>();
 	}
     private PlayerSwingInfo SwingInfo = new PlayerSwingInfo();
 
@@ -110,10 +111,10 @@ public class PlayerController2D : MonoBehaviour
 	{
         if (State != EPlayerState.Swinging && SwingInfo.AttachPointValid)
         {
+            SwingInfo.PreviousAttachPoints.Clear();
             State = EPlayerState.Swinging;
             SwingJoint.enabled = true;
-            SwingJoint.connectedAnchor = SwingInfo.WorldAttachPoint;
-            SwingJoint.distance = (SwingInfo.WorldAttachPoint - new Vector2(transform.position.x, transform.position.y)).magnitude;
+            PushSwingJointPivot();
         }
 	}
 
@@ -121,10 +122,17 @@ public class PlayerController2D : MonoBehaviour
 	{
         if (State == EPlayerState.Swinging)
 		{
+            SwingInfo.PreviousAttachPoints.Clear();
             SwingJoint.enabled = false;
             State = GetIsGrounded() ? EPlayerState.Grounded : EPlayerState.Freefall;
 		}
 	}
+
+    private void PushSwingJointPivot()
+	{
+        SwingJoint.connectedAnchor = SwingInfo.WorldAttachPoint;
+        SwingJoint.distance = (SwingInfo.WorldAttachPoint - new Vector2(transform.position.x, transform.position.y)).magnitude;
+    }
 
     private bool GetIsGrounded()
 	{
@@ -139,6 +147,50 @@ public class PlayerController2D : MonoBehaviour
 	{
         if (State == EPlayerState.Swinging)
 		{
+            // If needed, simulate wrapping the rope around corners as the player swings
+            RaycastHit2D[] rayHits = new RaycastHit2D[10];
+            ContactFilter2D filter = new ContactFilter2D();
+            Vector2 toSwingPoint = SwingInfo.WorldAttachPoint - new Vector2(transform.position.x, transform.position.y);
+            int numHits = Physics2D.Raycast(transform.position, toSwingPoint.normalized, filter, rayHits, toSwingPoint.magnitude + 0.01f);
+            bool wrapped = false;
+            for (int i = 0; i < numHits; ++i)
+            {
+                if (rayHits[i].collider.gameObject != gameObject && !rayHits[i].collider.isTrigger)
+                {
+                    if ((rayHits[i].point - SwingInfo.WorldAttachPoint).magnitude > 0.01f)
+                    {
+                        // The player no longer has direct line-of-sight to the swing point, so we need to wrap
+                        SwingInfo.PreviousAttachPoints.Add(SwingInfo.WorldAttachPoint);
+                        // TODO: This isn't actually the exact wrapping point; that should be set to the collider vertex
+                        // (however it should be pretty close to the exact point in general)
+                        SwingInfo.WorldAttachPoint = rayHits[i].point;
+                        PushSwingJointPivot();
+                        wrapped = true;
+                    }
+                    break;
+                }
+            }
+            // Simulate unwrapping
+            if (!wrapped && SwingInfo.PreviousAttachPoints.Count > 0)
+            {
+                Vector2 prevPoint = SwingInfo.PreviousAttachPoints[SwingInfo.PreviousAttachPoints.Count - 1];
+                toSwingPoint = prevPoint - new Vector2(transform.position.x, transform.position.y);
+                numHits = Physics2D.Raycast(transform.position, toSwingPoint.normalized, filter, rayHits, toSwingPoint.magnitude + 0.01f);
+                for (int i = 0; i < numHits; ++i)
+                {
+                    if (rayHits[i].collider.gameObject != gameObject && !rayHits[i].collider.isTrigger)
+                    {
+                        if ((rayHits[i].point - prevPoint).magnitude <= 0.01f)
+						{
+                            // The player now has line-of-sight to the previous swing point, so we unwrap
+                            SwingInfo.PreviousAttachPoints.RemoveAt(SwingInfo.PreviousAttachPoints.Count - 1);
+                            SwingInfo.WorldAttachPoint = prevPoint;
+                            PushSwingJointPivot();
+						}
+                        break;
+                    }
+                }
+            }
             // Player is FULLY controlled by gravity, with no motion input
             return;
 		}
@@ -208,11 +260,17 @@ public class PlayerController2D : MonoBehaviour
     {
         if (State == EPlayerState.Swinging)
         {
-            // Render current swing joint
+            // Render current swing joint, and all previous wrapped segments if present
             Color lineColor = Color.white;
             LineRenderComp.startColor = lineColor;
             LineRenderComp.endColor = lineColor;
-            LineRenderComp.SetPositions(new Vector3[] { gameObject.transform.position, SwingInfo.WorldAttachPoint });
+            LineRenderComp.positionCount = SwingInfo.PreviousAttachPoints.Count + 2;
+            for (int i = 0; i < SwingInfo.PreviousAttachPoints.Count; ++i)
+			{
+                LineRenderComp.SetPosition(i, SwingInfo.PreviousAttachPoints[i]);
+            }
+            LineRenderComp.SetPosition(SwingInfo.PreviousAttachPoints.Count, SwingInfo.WorldAttachPoint);
+            LineRenderComp.SetPosition(SwingInfo.PreviousAttachPoints.Count + 1, gameObject.transform.position);
         }
         else
         {
@@ -246,13 +304,15 @@ public class PlayerController2D : MonoBehaviour
             }
             LineRenderComp.startColor = lineColor;
             LineRenderComp.endColor = lineColor;
+            LineRenderComp.positionCount = 2;
             LineRenderComp.SetPositions(new Vector3[] { gameObject.transform.position, endPoint });
         }
         // Render swing attach point, if applicable
         if (SwingInfo.AttachPointValid)
         {
             SwingPointMarker.enabled = true;
-            SwingPointMarker.transform.position = new Vector3(SwingInfo.WorldAttachPoint.x, SwingInfo.WorldAttachPoint.y, 0.0f);
+            Vector2 renderPoint = (SwingInfo.PreviousAttachPoints.Count > 0) ? SwingInfo.PreviousAttachPoints[0] : SwingInfo.WorldAttachPoint;
+            SwingPointMarker.transform.position = new Vector3(renderPoint.x, renderPoint.y, 0.0f);
         }
         else
         {

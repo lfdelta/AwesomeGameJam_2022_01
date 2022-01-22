@@ -72,7 +72,6 @@ public class PlayerController2D : MonoBehaviour
         colliderBottom.y -= ColliderObj.bounds.extents.y + 0.01f; // Epsilon to get out of the collider itself
         RaycastHit2D hit = Physics2D.Raycast(colliderBottom, Vector2.down, GroundRaycastDist);
         bool newIsGrounded = hit.collider != null;
-        Debug.Log(newIsGrounded ? "Grounded" : "Not grounded");
         if (newIsGrounded != IsGrounded)
         {
             if (newIsGrounded)

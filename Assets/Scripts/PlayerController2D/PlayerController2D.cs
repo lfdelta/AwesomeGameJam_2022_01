@@ -33,6 +33,7 @@ public class PlayerController2D : MonoBehaviour
 	private bool IsGrounded = false;
 	private bool IsJumpingUp = false;
 
+	private bool HasTouchedGround = false;
 	private Vector2 LastGroundPosition = new Vector2(0.0f, float.NegativeInfinity);
 
 	public SpriteRenderer SwingPointMarker;
@@ -47,7 +48,7 @@ public class PlayerController2D : MonoBehaviour
 	public float GroundRaycastDist = 0.05f;
 	public float MaxSwingRadius = 10.0f;
 	public int NumJumps = 1;
-	public float MaxFallDistance = 100.0f;
+	public float MaxFallDistance = 1000.0f;
 
 	// Start is called before the first frame update
 	void Start()
@@ -65,6 +66,13 @@ public class PlayerController2D : MonoBehaviour
 		SwingJoint.maxDistanceOnly = false;
 
 		State = GetIsGrounded() ? EPlayerState.Grounded : EPlayerState.Freefall;
+	}
+
+	public void Teleport(Vector2 TargetPos)
+	{
+		transform.position = TargetPos;
+		Rbody.velocity = Vector2.zero;
+		HasTouchedGround = false; // Prevent auto-killing when teleporting downward
 	}
 
 	public void SetMoveInputDirection(Vector2 Dir)
@@ -224,18 +232,19 @@ public class PlayerController2D : MonoBehaviour
 			IsGrounded = newIsGrounded;
 		}
 
+		// Detect if player has fallen too far
 		if (IsGrounded)
 		{
+			HasTouchedGround = true;
 			LastGroundPosition = transform.position;
 		}
-
-		// Detect if player has fallen max distance allowed
-		else if (State == EPlayerState.Freefall)
+		else if (State == EPlayerState.Freefall && HasTouchedGround)
 		{
 			float fallDistance = LastGroundPosition.y - transform.position.y;
 			if (fallDistance > MaxFallDistance)
 			{
-				Debug.Log("Fell too far");
+				Teleport(LastGroundPosition);
+				return;
 			}
 		}
 

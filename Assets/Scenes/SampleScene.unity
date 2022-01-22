@@ -1559,7 +1559,7 @@ MonoBehaviour:
   GroundRaycastDist: 1
   MaxSwingRadius: 200
   NumJumps: 2
-  MaxFallDistance: 100
+  MaxFallDistance: 1000
 --- !u!114 &1712289500
 MonoBehaviour:
   m_ObjectHideFlags: 0

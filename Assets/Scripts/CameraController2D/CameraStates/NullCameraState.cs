@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class NullCameraState : CameraState
 {
-    override public void Enter(CameraController2D Controller)
+    override public void EnterState(CameraController2D Controller)
     {
     }
 
-    override public void Exit(CameraController2D Controller)
+    override public void ExitState(CameraController2D Controller)
     {
     }
 
-    public override CameraState Update(CameraController2D Controller)
+    public override CameraState UpdateState(CameraController2D Controller)
     {
         return null;
     }

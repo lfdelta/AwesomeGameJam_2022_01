@@ -278,8 +278,8 @@ MonoBehaviour:
   m_RefResolutionY: 320
   m_UpscaleRT: 0
   m_PixelSnapping: 1
-  m_CropFrameX: 0
-  m_CropFrameY: 0
+  m_CropFrameX: 1
+  m_CropFrameY: 1
   m_StretchFill: 0
 --- !u!20 &519420031
 Camera:
@@ -351,6 +351,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TargetObj: {fileID: 1712289494}
+  MinOffsetFraction: 0
+  MaxOffsetFraction: 0.7
+  MaxOffsetMoveSpeed: 0.1
+  SpeedForMaxOffsetFraction: 400
 --- !u!114 &519420034
 MonoBehaviour:
   m_ObjectHideFlags: 0

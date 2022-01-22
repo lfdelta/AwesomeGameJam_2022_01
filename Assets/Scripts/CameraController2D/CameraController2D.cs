@@ -24,13 +24,13 @@ public class CameraController2D : MonoBehaviour
         {
             State = DefaultState;
         }
-        State.Enter(this);
+        State.EnterState(this);
     }
 
     // LateUpdate is called once per frame, after all of the Update calls
     void LateUpdate()
     {
-        CameraState newState = State.Update(this);
+        CameraState newState = State.UpdateState(this);
         if (newState != null)
 		{
             TransitionTo(newState);
@@ -44,8 +44,8 @@ public class CameraController2D : MonoBehaviour
 
     public void TransitionTo(CameraState NewState)
 	{
-        State.Exit(this);
-        NewState.Enter(this);
+        State.ExitState(this);
+        NewState.EnterState(this);
         State = NewState;
 	}
 }

@@ -16,17 +16,17 @@ public class InterpToObjectCameraState : CameraState
         EndTime = StartTime + InterpTime;
     }
 
-    override public void Enter(CameraController2D Controller)
+    override public void EnterState(CameraController2D Controller)
     {
         Vector3 camPos = Controller.CameraObj.transform.position;
         StartPos = new Vector2(camPos.x, camPos.y);
     }
 
-    override public void Exit(CameraController2D Controller)
+    override public void ExitState(CameraController2D Controller)
     {
     }
 
-    public override CameraState Update(CameraController2D Controller)
+    public override CameraState UpdateState(CameraController2D Controller)
     {
         float alpha = (Time.time - StartTime) / (EndTime - StartTime);
         Vector3 camPos = Controller.CameraObj.transform.position;

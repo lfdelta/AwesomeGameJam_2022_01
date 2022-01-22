@@ -85,7 +85,8 @@ public class PlayerController2D : MonoBehaviour
 
     public void StartJump()
 	{
-        if (NumJumpsRemaining == 0)
+        // No jumping while swinging
+        if (NumJumpsRemaining == 0 || State == EPlayerState.Swinging)
 		{
             return;
 		}

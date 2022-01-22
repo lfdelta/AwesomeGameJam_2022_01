@@ -232,11 +232,21 @@ public class PlayerController2D : MonoBehaviour
 				}
 			}
             // Render the sight-line for the swing
-            Vector3 aimOffset = new Vector3(AimDir.x, AimDir.y, 0.0f) * MaxSwingRadius;
-            Color lineColor = (SwingInfo.AttachPointValid) ? Color.green : Color.red;
+            Color lineColor;
+            Vector3 endPoint;
+            if (SwingInfo.AttachPointValid)
+			{
+                lineColor = Color.green;
+                endPoint = SwingInfo.WorldAttachPoint;
+            }
+            else
+			{
+                lineColor = Color.red;
+                endPoint = gameObject.transform.position + new Vector3(AimDir.x, AimDir.y, 0.0f) * MaxSwingRadius;
+            }
             LineRenderComp.startColor = lineColor;
             LineRenderComp.endColor = lineColor;
-            LineRenderComp.SetPositions(new Vector3[] { gameObject.transform.position, gameObject.transform.position + aimOffset });
+            LineRenderComp.SetPositions(new Vector3[] { gameObject.transform.position, endPoint });
         }
         // Render swing attach point, if applicable
         if (SwingInfo.AttachPointValid)

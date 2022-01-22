@@ -3,15 +3,10 @@ using System.IO;
 
 public class Player
 {
-  public Player(string name)
+  public Player()
   {
-    Name = name;
+    
   }
 
-  public string Name { get; }
-
-  public override string ToString()
-  {
-    return $"The player's name is {this.Name}";
-  }
+  
 }

@@ -89,7 +89,6 @@ public class PlayerController2D : MonoBehaviour
 		{
             return;
 		}
-        Debug.Log("Jumping");
         State = EPlayerState.Freefall;
         IsJumpingUp = true;
         // Reset vertical velocity

@@ -224,7 +224,6 @@ public class PlayerController2D : MonoBehaviour
 			ContactFilter2D filter = new ContactFilter2D();
 			Vector2 toSwingPoint = SwingInfo.WorldAttachPoint - new Vector2(transform.position.x, transform.position.y);
 			SwingInfo.SwingingCW = Vector3.Cross(toSwingPoint, Rbody.velocity).z < 0.0f;
-			Debug.Log($"{SwingInfo.SwingingCW}");
 			int numHits = Physics2D.Raycast(transform.position, toSwingPoint.normalized, filter, rayHits, toSwingPoint.magnitude + 0.01f);
 			bool wrapped = false;
 			for (int i = 0; i < numHits; ++i)
@@ -329,14 +328,13 @@ public class PlayerController2D : MonoBehaviour
 		// Apply input and drag, clamping final horizontal speed to [0, maxSpeed]
 		signedHorizSpeed += MoveInputDir.x * MoveAcceleration * Time.fixedDeltaTime;
 		horizSpeed = Mathf.Abs(signedHorizSpeed);
-		// Try not to prevent the player from starting to move if the drag exceeds the acceleration
 		if (horizSpeed < dragSpeedChange)
 		{
-			if (dragSpeedChange < MoveAcceleration * Time.fixedDeltaTime)
+			// Try not to prevent the player from starting to move if the drag exceeds the max acceleration
+			if (dragSpeedChange < MoveAcceleration * Time.fixedDeltaTime || Mathf.Abs(MoveInputDir.x) < 0.8f)
 			{
-				;
+				signedHorizSpeed = 0.0f;
 			}
-			signedHorizSpeed = 0.0f;
 		}
 		else if (horizSpeed > maxSpeed + dragSpeedChange)
 		{

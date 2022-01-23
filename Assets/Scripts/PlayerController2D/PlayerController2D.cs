@@ -139,6 +139,8 @@ public class PlayerController2D : MonoBehaviour
 			Rbody.gravityScale = 1.0f;
 			SwingJoint.enabled = true;
 			PushSwingJointPivot();
+			AudioManager audio = FindObjectOfType<AudioManager>();
+			audio.PlaySound(audio.Swing);
 		}
 	}
 
@@ -149,6 +151,8 @@ public class PlayerController2D : MonoBehaviour
 			SwingInfo.PreviousAttachPoints.Clear();
 			SwingJoint.enabled = false;
 			State = EPlayerState.Freefall; // This will get fixed up on the next FixedUpdate if the player is actually grounded
+			AudioManager audio = FindObjectOfType<AudioManager>();
+			audio.PlaySound(audio.ReleaseSwing);
 		}
 	}
 
@@ -212,16 +216,20 @@ public class PlayerController2D : MonoBehaviour
 		if (collision.relativeVelocity.y >= FallKillSpeed)
 		{
 			Teleport(LastGroundPosition);
+			AudioManager audio = FindObjectOfType<AudioManager>();
+			audio.PlaySound(audio.FallTooFar);
 		}
 	}
 
 	// FixedUpdate is called once per physics tick
 	void FixedUpdate()
 	{
+		AudioManager audio = FindObjectOfType<AudioManager>();
 		// Detect player hitting the kill plane
 		if (transform.position.y < WorldKillPlane)
 		{
 			Teleport(LastGroundPosition);
+			audio.PlaySound(audio.FallTooFar);
 			return;
 		}
 
@@ -299,14 +307,15 @@ public class PlayerController2D : MonoBehaviour
 				if (Rbody.velocity.y <= -FallKillSpeed)
 				{
 					Teleport(LastGroundPosition);
+					audio.PlaySound(audio.FallTooFar);
 					return;
 				}
 				State = EPlayerState.Grounded;
 				// Track some safe position to reset to on death
 				LastGroundPosition = transform.position;
 				NumJumpsRemaining = NumJumps;
-				//Rbody.gravityScale = 1.0f;
 				Rbody.gravityScale = 0.0f;
+				audio.PlaySound(audio.Land);
 			}
 			else
 			{

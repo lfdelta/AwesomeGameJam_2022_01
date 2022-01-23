@@ -23,12 +23,15 @@ public class GlobalManager : MonoBehaviour
 
 	public bool TryCarryTreasure(TreasurePickup treasure)
 	{
+		AudioManager audio = FindObjectOfType<AudioManager>();
 		if (CarriedTreasure != null)
 		{
+			audio.PlaySound(audio.TreasurePickupFail);
 			return false;
 		}
 		CarriedTreasure = treasure;
 		UIObject.UpdateUI(AllTreasures, RetrievedTreasures, CarriedTreasure);
+		audio.PlaySound(audio.TreasurePickup);
 		return true;
 	}
 
@@ -55,5 +58,17 @@ public class GlobalManager : MonoBehaviour
 		RetrievedTreasures[ind] = true;
 		CarriedTreasure = null;
 		UIObject.UpdateUI(AllTreasures, RetrievedTreasures, CarriedTreasure);
+
+		bool allTreasuresCollected = true;
+		for (int i = 0; i < RetrievedTreasures.Length; ++i)
+		{
+			if (RetrievedTreasures[i] == false)
+			{
+				allTreasuresCollected = false;
+				break;
+			}
+		}
+		AudioManager audio = FindObjectOfType<AudioManager>();
+		audio.PlaySound(allTreasuresCollected ? audio.AllTreasuresCollected : audio.TreasureDropoff);
 	}
 }

@@ -13,6 +13,7 @@ public class AudioManager : MonoBehaviour
 	public AudioClip TreasurePickup;
 	public AudioClip TreasurePickupFail;
 	public AudioClip TreasureDropoff;
+	public AudioClip AllTreasuresCollected;
 
 	private AudioSource Source;
 

@@ -184,6 +184,7 @@ MonoBehaviour:
   TreasurePickup: {fileID: 8300000, guid: 8c0791fe2bcab490a938e89882a7d628, type: 3}
   TreasurePickupFail: {fileID: 8300000, guid: c3a9d6519bd7d46feb8d35f4c865e4d6, type: 3}
   TreasureDropoff: {fileID: 8300000, guid: 6727cdcb3dc5445e397339bd198d9440, type: 3}
+  AllTreasuresCollected: {fileID: 8300000, guid: 31ddf8b26341a0349bdfe09689d6c3d8, type: 3}
 --- !u!1 &5509418484908849270
 GameObject:
   m_ObjectHideFlags: 0

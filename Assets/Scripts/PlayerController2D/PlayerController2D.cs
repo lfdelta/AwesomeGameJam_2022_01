@@ -137,7 +137,7 @@ public class PlayerController2D : MonoBehaviour
 		{
 			SwingInfo.PreviousAttachPoints.Clear();
 			SwingJoint.enabled = false;
-			State = GetIsGrounded() ? EPlayerState.Grounded : EPlayerState.Freefall;
+			State = EPlayerState.Freefall; // This will get fixed up on the next FixedUpdate if the player is actually grounded
 		}
 	}
 

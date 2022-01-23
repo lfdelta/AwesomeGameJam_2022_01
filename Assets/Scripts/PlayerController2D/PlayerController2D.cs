@@ -206,6 +206,11 @@ public class PlayerController2D : MonoBehaviour
 	{
 		// TODO: remove once FallKillSpeed is tuned
 		Debug.Log($"{collision.relativeVelocity}");
+		// Detect when the player hits the ground too quickly
+		if (collision.relativeVelocity.y >= FallKillSpeed)
+		{
+			Teleport(LastGroundPosition);
+		}
 	}
 
 	// FixedUpdate is called once per physics tick
@@ -255,7 +260,6 @@ public class PlayerController2D : MonoBehaviour
 				if (SwingInfo.SwingingCW != prevPoint.WrappedCW)
 				{
 					toSwingPoint = prevPoint.WorldPosition - new Vector2(transform.position.x, transform.position.y);
-					//float angle = Vector2.Angle(Vector2.up, toSwingPoint);
 					float angle = Mathf.Atan2(toSwingPoint.y, toSwingPoint.x);
 					if (prevPoint.WrappedCW ? (angle < prevPoint.Angle) : (angle > prevPoint.Angle))
 					{
@@ -288,8 +292,8 @@ public class PlayerController2D : MonoBehaviour
 			if (isGrounded)
 			{
 				// Detect when the player hits the ground too quickly
-				// Doing this here because OnCollisionEnter2D can be called after the player is set
-				//  to the grounded state, which causes them to "teleport" the exact spot they just hit
+				// Doing this here because OnCollisionEnter2D is sometimes called after this instead of before,
+				//  which then causes them to "teleport" the exact spot they just hit
 				if (Rbody.velocity.y <= -FallKillSpeed)
 				{
 					Teleport(LastGroundPosition);

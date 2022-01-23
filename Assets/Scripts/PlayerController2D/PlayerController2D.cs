@@ -94,7 +94,7 @@ public class PlayerController2D : MonoBehaviour
 		{
 			// Up and forward at a 45-degree angle
 			float xSign = (LastMotionDir.x == 0.0f) ? 1.0f : Mathf.Sign(LastMotionDir.x);
-			AimDir = new Vector2(xSign, -1.0f).normalized;
+			AimDir = new Vector2(xSign, 1.0f).normalized;
 		}
 		else
 		{
@@ -267,6 +267,10 @@ public class PlayerController2D : MonoBehaviour
 				}
 			}
 			// Player is FULLY controlled by gravity, with no motion input
+			if (Rbody.velocity != Vector2.zero)
+			{
+				LastMotionDir = Rbody.velocity;
+			}
 			return;
 		}
 
@@ -347,7 +351,10 @@ public class PlayerController2D : MonoBehaviour
 			signedHorizSpeed -= Mathf.Sign(signedHorizSpeed) * dragSpeedChange;
 		}
 		Rbody.velocity = (signedHorizSpeed * rightVelNormal) + (signedVertSpeed * upVelNormal);
-		LastMotionDir = Rbody.velocity;
+		if (Rbody.velocity != Vector2.zero)
+		{
+			LastMotionDir = Rbody.velocity;
+		}
 	}
 
 	// Update is called once per frame

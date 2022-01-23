@@ -5,6 +5,8 @@ using UnityEngine;
 public class PlayerInputManager : MonoBehaviour
 {
     private PlayerController2D Controller;
+    private bool AimWithMouse = true;
+    private Vector3 LastMousePosition = Vector3.zero;
 
     // Start is called before the first frame update
     void Start()
@@ -29,17 +31,25 @@ public class PlayerInputManager : MonoBehaviour
 		}
         Vector2 MoveDir = new Vector2(Input.GetAxis("MoveHorizontal"), Input.GetAxis("MoveVertical"));
         Controller.SetMoveInputDirection(MoveDir);
+
         Vector2 AimDir = new Vector2(Input.GetAxis("AimHorizontal"), Input.GetAxis("AimVertical"));
-        if (AimDir != Vector2.zero)
+        if (Input.mousePosition != LastMousePosition)
         {
-            Controller.SetAimInputDirection(AimDir);
+            AimWithMouse = true;
+            LastMousePosition = Input.mousePosition;
         }
-		else
+        else if (AimWithMouse && AimDir != Vector2.zero)
 		{
+            AimWithMouse = false;
+		}
+        if (AimWithMouse)
+        {
+            // Override (zero-val) AimDir
             Vector2 MousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector3 PlayerPos = Controller.gameObject.transform.position;
-            Controller.SetAimInputDirection(MousePos - new Vector2(PlayerPos.x, PlayerPos.y));
-		}
+            AimDir = MousePos - new Vector2(PlayerPos.x, PlayerPos.y);
+        }
+        Controller.SetAimInputDirection(AimDir);
 
         if (Input.GetButtonDown("Jump"))
 		{

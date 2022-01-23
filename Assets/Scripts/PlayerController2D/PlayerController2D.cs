@@ -30,7 +30,6 @@ public class PlayerController2D : MonoBehaviour
 	private Vector2 AimDir = Vector2.right;
 	private int NumJumpsRemaining = 0;
 	private Vector2 LastMotionDir = Vector2.zero;
-	private bool IsGrounded = false;
 	private bool IsJumpingUp = false;
 
 	private bool HasTouchedGround = false;
@@ -102,10 +101,12 @@ public class PlayerController2D : MonoBehaviour
 		{
 			return;
 		}
+		Vector2 rightVelNormal = (State == EPlayerState.Grounded) ? -Vector2.Perpendicular(GroundNormal) : Vector2.right;
 		State = EPlayerState.Freefall;
 		IsJumpingUp = true;
 		// Reset vertical velocity
-		Rbody.velocity = new Vector2(Rbody.velocity.x, JumpVelocity);
+		float signedHorizSpeed = Vector2.Dot(Rbody.velocity, rightVelNormal);
+		Rbody.velocity = (signedHorizSpeed * rightVelNormal) + new Vector2(0.0f, JumpVelocity);
 		Rbody.gravityScale = JumpHoldGravityScale;
 		--NumJumpsRemaining;
 	}
@@ -253,26 +254,28 @@ public class PlayerController2D : MonoBehaviour
 		}
 
 		// Detect grounded state and transition appropriately
-		bool newIsGrounded = GetIsGrounded();
-		if (newIsGrounded != IsGrounded)
+		bool isGrounded = GetIsGrounded();
+		if (isGrounded != (State == EPlayerState.Grounded))
 		{
-			if (newIsGrounded)
+			if (isGrounded)
 			{
 				State = EPlayerState.Grounded;
 				NumJumpsRemaining = NumJumps;
 				Rbody.gravityScale = 1.0f;
 			}
-			else if (NumJumps > 0 && NumJumpsRemaining == NumJumps)
+			else
 			{
 				State = EPlayerState.Freefall;
-				// Remove the "first jump" if the player runs off a ledge
-				--NumJumpsRemaining;
+				if (NumJumps > 0 && NumJumpsRemaining == NumJumps)
+				{
+					// Remove the "first jump" if the player runs off a ledge
+					--NumJumpsRemaining;
+				}
 			}
-			IsGrounded = newIsGrounded;
 		}
 
 		// Detect if player has fallen too far
-		if (IsGrounded)
+		if (isGrounded)
 		{
 			HasTouchedGround = true;
 			LastGroundPosition = transform.position;
@@ -288,12 +291,12 @@ public class PlayerController2D : MonoBehaviour
 		}
 
 		// Apply horizontal physics
-		Vector2 upVelNormal = IsGrounded ? GroundNormal : Vector2.up;
-		Vector2 rightVelNormal = IsGrounded ? -Vector2.Perpendicular(GroundNormal) : Vector2.right;
+		Vector2 upVelNormal = isGrounded ? GroundNormal : Vector2.up;
+		Vector2 rightVelNormal = isGrounded ? -Vector2.Perpendicular(GroundNormal) : Vector2.right;
 		float signedHorizSpeed = Vector2.Dot(Rbody.velocity, rightVelNormal);
 		float signedVertSpeed = Vector2.Dot(Rbody.velocity, upVelNormal);
 		float horizSpeed = Mathf.Abs(signedHorizSpeed);
-		float maxSpeed = IsGrounded ? MaxGroundSpeed : MaxAirSpeed;
+		float maxSpeed = isGrounded ? MaxGroundSpeed : MaxAirSpeed;
 		float dragSpeedChange;
 		// Only apply drag when the user isn't trying to accelerate
 		if (horizSpeed == 0.0f || (Mathf.Abs(MoveInputDir.x) > 0.001f && (MoveInputDir.x > 0.0f) == (signedHorizSpeed > 0.0f)))
@@ -302,7 +305,7 @@ public class PlayerController2D : MonoBehaviour
 		}
 		else
 		{
-			dragSpeedChange = (IsGrounded ? GroundDragAcceleration : AirDragAcceleration) * Time.fixedDeltaTime;
+			dragSpeedChange = (isGrounded ? GroundDragAcceleration : AirDragAcceleration) * Time.fixedDeltaTime;
 		}
 		// Apply input and drag, clamping final horizontal speed to [0, maxSpeed]
 		signedHorizSpeed += MoveInputDir.x * MoveAcceleration * Time.fixedDeltaTime;

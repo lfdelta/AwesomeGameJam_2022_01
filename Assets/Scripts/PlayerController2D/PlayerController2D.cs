@@ -35,6 +35,7 @@ public class PlayerController2D : MonoBehaviour
 
 	private bool HasTouchedGround = false;
 	private Vector2 LastGroundPosition = new Vector2(0.0f, float.NegativeInfinity);
+	private Vector2 GroundNormal = Vector2.up;
 
 	public SpriteRenderer SwingPointMarker;
 
@@ -181,7 +182,7 @@ public class PlayerController2D : MonoBehaviour
 					// Allow slopes just steeper than 45 degrees
 					if (rayHits[i].normal.y > 0.7f)
 					{
-						//LastGroundNormal = rayHits[i].normal;
+						GroundNormal = rayHits[i].normal;
 						return true;
 					}
 					return false;
@@ -287,12 +288,15 @@ public class PlayerController2D : MonoBehaviour
 		}
 
 		// Apply horizontal physics
-		float horizVelocity = Rbody.velocity.x;
-		float horizSpeed = Mathf.Abs(horizVelocity);
+		Vector2 upVelNormal = IsGrounded ? GroundNormal : Vector2.up;
+		Vector2 rightVelNormal = IsGrounded ? -Vector2.Perpendicular(GroundNormal) : Vector2.right;
+		float signedHorizSpeed = Vector2.Dot(Rbody.velocity, rightVelNormal);
+		float signedVertSpeed = Vector2.Dot(Rbody.velocity, upVelNormal);
+		float horizSpeed = Mathf.Abs(signedHorizSpeed);
 		float maxSpeed = IsGrounded ? MaxGroundSpeed : MaxAirSpeed;
 		float dragSpeedChange;
 		// Only apply drag when the user isn't trying to accelerate
-		if (horizSpeed == 0.0f || (Mathf.Abs(MoveInputDir.x) > 0.001f && (MoveInputDir.x > 0.0f) == (horizVelocity > 0.0f)))
+		if (horizSpeed == 0.0f || (Mathf.Abs(MoveInputDir.x) > 0.001f && (MoveInputDir.x > 0.0f) == (signedHorizSpeed > 0.0f)))
 		{
 			dragSpeedChange = 0.0f;
 		}
@@ -301,21 +305,21 @@ public class PlayerController2D : MonoBehaviour
 			dragSpeedChange = (IsGrounded ? GroundDragAcceleration : AirDragAcceleration) * Time.fixedDeltaTime;
 		}
 		// Apply input and drag, clamping final horizontal speed to [0, maxSpeed]
-		horizVelocity += MoveInputDir.x * MoveAcceleration * Time.fixedDeltaTime;
-		horizSpeed = Mathf.Abs(horizVelocity);
+		signedHorizSpeed += MoveInputDir.x * MoveAcceleration * Time.fixedDeltaTime;
+		horizSpeed = Mathf.Abs(signedHorizSpeed);
 		if (horizSpeed < dragSpeedChange)
 		{
-			horizVelocity = 0.0f;
+			signedHorizSpeed = 0.0f;
 		}
 		else if (horizSpeed > maxSpeed)
 		{
-			horizVelocity = Mathf.Sign(horizVelocity) * maxSpeed;
+			signedHorizSpeed = Mathf.Sign(signedHorizSpeed) * maxSpeed;
 		}
 		else
 		{
-			horizVelocity -= Mathf.Sign(horizVelocity) * dragSpeedChange;
+			signedHorizSpeed -= Mathf.Sign(signedHorizSpeed) * dragSpeedChange;
 		}
-		Rbody.velocity = new Vector2(horizVelocity, Rbody.velocity.y);
+		Rbody.velocity = (signedHorizSpeed * rightVelNormal) + (signedVertSpeed * upVelNormal);
 		LastMotionDir = Rbody.velocity;
 	}
 

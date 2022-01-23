@@ -10,6 +10,7 @@
 /[Ll]ogs/
 /[Mm]emoryCaptures/
 
+/UserSettings/EditorUserSettings.asset
 
 # macOS and emacs stuff
 *.DS_Store

@@ -134,6 +134,7 @@ public class PlayerController2D : MonoBehaviour
 		{
 			SwingInfo.PreviousAttachPoints.Clear();
 			State = EPlayerState.Swinging;
+			Rbody.gravityScale = 1.0f;
 			SwingJoint.enabled = true;
 			PushSwingJointPivot();
 		}
@@ -261,6 +262,7 @@ public class PlayerController2D : MonoBehaviour
 						// The player has come back into alignment with the previous swinging point, so we unwrap
 						SwingInfo.WorldAttachPoint = prevPoint.WorldPosition;
 						SwingInfo.PreviousAttachPoints.RemoveAt(SwingInfo.PreviousAttachPoints.Count - 1);
+						PushSwingJointPivot();
 					}
 				}
 			}

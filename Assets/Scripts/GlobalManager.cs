@@ -32,11 +32,10 @@ public class GlobalManager : MonoBehaviour
 		return true;
 	}
 
-	public void DropOffTreasure()
+	public void TryDropOffTreasure()
 	{
 		if (CarriedTreasure == null)
 		{
-			Debug.LogError("DropOffTreasure called but CarriedTreasure is null");
 			return;
 		}
 		int ind = -1;

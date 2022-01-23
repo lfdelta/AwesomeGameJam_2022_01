@@ -10,7 +10,7 @@ public class TreasureDropoff : MonoBehaviour
 		GlobalManager mgr = FindObjectOfType<GlobalManager>();
 		if (mgr != null)
 		{
-			mgr.DropOffTreasure();
+			mgr.TryDropOffTreasure();
 		}
 	}
 }

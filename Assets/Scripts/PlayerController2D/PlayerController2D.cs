@@ -330,8 +330,12 @@ public class PlayerController2D : MonoBehaviour
 		signedHorizSpeed += MoveInputDir.x * MoveAcceleration * Time.fixedDeltaTime;
 		horizSpeed = Mathf.Abs(signedHorizSpeed);
 		// Try not to prevent the player from starting to move if the drag exceeds the acceleration
-		if (horizSpeed < dragSpeedChange && (dragSpeedChange < MoveAcceleration * Time.fixedDeltaTime))
+		if (horizSpeed < dragSpeedChange)
 		{
+			if (dragSpeedChange < MoveAcceleration * Time.fixedDeltaTime)
+			{
+				;
+			}
 			signedHorizSpeed = 0.0f;
 		}
 		else if (horizSpeed > maxSpeed + dragSpeedChange)

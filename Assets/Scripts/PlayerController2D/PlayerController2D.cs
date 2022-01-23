@@ -32,7 +32,6 @@ public class PlayerController2D : MonoBehaviour
 	private Vector2 LastMotionDir = Vector2.zero;
 	private bool IsJumpingUp = false;
 
-	private bool HasTouchedGround = false;
 	private Vector2 LastGroundPosition = new Vector2(0.0f, float.NegativeInfinity);
 	private Vector2 GroundNormal = Vector2.up;
 
@@ -48,7 +47,8 @@ public class PlayerController2D : MonoBehaviour
 	public float GroundRaycastDist = 0.05f;
 	public float MaxSwingRadius = 10.0f;
 	public int NumJumps = 1;
-	public float MaxFallDistance = 1000.0f;
+	public float FallKillSpeed = 1000.0f;
+	public float WorldKillPlane = float.NegativeInfinity;
 
 	// Start is called before the first frame update
 	void Start()
@@ -70,9 +70,9 @@ public class PlayerController2D : MonoBehaviour
 
 	public void Teleport(Vector2 TargetPos)
 	{
+		EndSwing();
 		transform.position = TargetPos;
 		Rbody.velocity = Vector2.zero;
-		HasTouchedGround = false; // Prevent auto-killing when teleporting downward
 	}
 
 	public void SetMoveInputDirection(Vector2 Dir)
@@ -193,9 +193,22 @@ public class PlayerController2D : MonoBehaviour
 		return false;
 	}
 
+	private void OnCollisionEnter2D(Collision2D collision)
+	{
+		// TODO: remove once FallKillSpeed is tuned
+		Debug.Log($"{collision.relativeVelocity}");
+	}
+
 	// FixedUpdate is called once per physics tick
 	void FixedUpdate()
 	{
+		// Detect player hitting the kill plane
+		if (transform.position.y < WorldKillPlane)
+		{
+			Teleport(LastGroundPosition);
+			return;
+		}
+
 		if (State == EPlayerState.Swinging)
 		{
 			// If needed, simulate wrapping the rope around corners as the player swings
@@ -259,7 +272,17 @@ public class PlayerController2D : MonoBehaviour
 		{
 			if (isGrounded)
 			{
+				// Detect when the player hits the ground too quickly
+				// Doing this here because OnCollisionEnter2D can be called after the player is set
+				//  to the grounded state, which causes them to "teleport" the exact spot they just hit
+				if (Rbody.velocity.y <= -FallKillSpeed)
+				{
+					Teleport(LastGroundPosition);
+					return;
+				}
 				State = EPlayerState.Grounded;
+				// Track some safe position to reset to on death
+				LastGroundPosition = transform.position;
 				NumJumpsRemaining = NumJumps;
 				Rbody.gravityScale = 1.0f;
 			}
@@ -271,22 +294,6 @@ public class PlayerController2D : MonoBehaviour
 					// Remove the "first jump" if the player runs off a ledge
 					--NumJumpsRemaining;
 				}
-			}
-		}
-
-		// Detect if player has fallen too far
-		if (isGrounded)
-		{
-			HasTouchedGround = true;
-			LastGroundPosition = transform.position;
-		}
-		else if (State == EPlayerState.Freefall && HasTouchedGround)
-		{
-			float fallDistance = LastGroundPosition.y - transform.position.y;
-			if (fallDistance > MaxFallDistance)
-			{
-				Teleport(LastGroundPosition);
-				return;
 			}
 		}
 

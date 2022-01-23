@@ -94,7 +94,7 @@ public class PlayerController2D : MonoBehaviour
 		{
 			// Up and forward at a 45-degree angle
 			float xSign = (LastMotionDir.x == 0.0f) ? 1.0f : Mathf.Sign(LastMotionDir.x);
-			AimDir = new Vector2(xSign, 1.0f).normalized;
+			AimDir = new Vector2(xSign, -1.0f).normalized;
 		}
 		else
 		{

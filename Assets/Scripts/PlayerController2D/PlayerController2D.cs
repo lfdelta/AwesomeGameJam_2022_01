@@ -148,9 +148,18 @@ public class PlayerController2D : MonoBehaviour
 	private bool GetIsGrounded()
 	{
 		Vector2 colliderBottom = ColliderObj.bounds.center;
-		colliderBottom.y -= ColliderObj.bounds.extents.y + 0.01f; // Epsilon to get out of the collider itself
-		RaycastHit2D hit = Physics2D.Raycast(colliderBottom, Vector2.down, GroundRaycastDist);
-		return hit.collider != null;
+		colliderBottom.y -= ColliderObj.bounds.extents.y;
+		RaycastHit2D[] rayHits = new RaycastHit2D[10];
+		ContactFilter2D filter = new ContactFilter2D();
+		int numHits = Physics2D.Raycast(colliderBottom, Vector2.down, filter, rayHits, GroundRaycastDist);
+		for (int i = 0; i < numHits; ++i)
+		{
+			if (rayHits[i].collider.gameObject != gameObject && !rayHits[i].collider.isTrigger)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	// FixedUpdate is called once per physics tick

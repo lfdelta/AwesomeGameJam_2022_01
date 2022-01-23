@@ -2345,9 +2345,19 @@ Tilemap:
       m_TileObjectToInstantiateIndex: 65535
       dummyAlignment: 0
       m_AllTileFlags: 2147483649
+  - first: {x: -23, y: 24, z: 0}
+    second:
+      serializedVersion: 2
+      m_TileIndex: 0
+      m_TileSpriteIndex: 1
+      m_TileMatrixIndex: 0
+      m_TileColorIndex: 0
+      m_TileObjectToInstantiateIndex: 65535
+      dummyAlignment: 0
+      m_AllTileFlags: 2147483649
   m_AnimatedTiles: {}
   m_TileAssetArray:
-  - m_RefCount: 27
+  - m_RefCount: 28
     m_Data: {fileID: 11400000, guid: fbd311a0146954f0f8b624525d30d5b2, type: 2}
   - m_RefCount: 13
     m_Data: {fileID: 11400000, guid: 7b334edf5abbb3e4c929023f79f94733, type: 2}
@@ -2358,14 +2368,14 @@ Tilemap:
   m_TileSpriteArray:
   - m_RefCount: 13
     m_Data: {fileID: 21300000, guid: 808239b18b2f42e4d97c5f8cf569de86, type: 3}
-  - m_RefCount: 27
+  - m_RefCount: 28
     m_Data: {fileID: 21300000, guid: 2f01e6fe5f4ad224f86cfd011a2921a6, type: 3}
   - m_RefCount: 13
     m_Data: {fileID: 21300000, guid: 0399d24de31fe834a86a7a1dbc3a6598, type: 3}
   - m_RefCount: 23
     m_Data: {fileID: 21300000, guid: c129382efc2df21489dc95a680fa86fa, type: 3}
   m_TileMatrixArray:
-  - m_RefCount: 76
+  - m_RefCount: 77
     m_Data:
       e00: 1
       e01: 0
@@ -2384,13 +2394,13 @@ Tilemap:
       e32: 0
       e33: 1
   m_TileColorArray:
-  - m_RefCount: 76
+  - m_RefCount: 77
     m_Data: {r: 1, g: 1, b: 1, a: 1}
   m_TileObjectToInstantiateArray: []
   m_AnimationFrameRate: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Origin: {x: -65, y: 0, z: 0}
-  m_Size: {x: 65, y: 19, z: 1}
+  m_Size: {x: 65, y: 25, z: 1}
   m_TileAnchor: {x: 0.5, y: 0.5, z: 0}
   m_TileOrientation: 0
   m_TileOrientationMatrix:
@@ -2446,6 +2456,22 @@ CompositeCollider2D:
   m_ColliderPaths:
   - m_Collider: {fileID: 1392951736}
     m_ColliderPaths:
+    - - X: -3519999900
+        Y: 3839999959
+      - X: -3519999900
+        Y: 4000000041
+      - X: -3519999959
+        Y: 4000000100
+      - X: -3680000041
+        Y: 4000000100
+      - X: -3680000100
+        Y: 4000000041
+      - X: -3680000100
+        Y: 3839999959
+      - X: -3680000041
+        Y: 3839999900
+      - X: -3519999959
+        Y: 3839999900
     - - X: -6400000000
         Y: 3040000000
       - X: -7040000000
@@ -2672,6 +2698,10 @@ CompositeCollider2D:
         Y: 640000000
   m_CompositePaths:
     m_Paths:
+    - - {x: -352.00003, y: 384}
+      - {x: -352.00003, y: 400}
+      - {x: -368, y: 399.99997}
+      - {x: -367.99997, y: 384}
     - - {x: -640.00006, y: 288}
       - {x: -640.00006, y: 304}
       - {x: -704, y: 303.99997}
@@ -3090,7 +3120,7 @@ Rigidbody2D:
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!114 &1712289499
 MonoBehaviour:
@@ -3105,7 +3135,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SwingPointMarker: {fileID: 2085534992}
-  MoveAcceleration: 1000
+  MoveAcceleration: 200
   MaxGroundSpeed: 200
   MaxAirSpeed: 250
   GroundDragAcceleration: 500

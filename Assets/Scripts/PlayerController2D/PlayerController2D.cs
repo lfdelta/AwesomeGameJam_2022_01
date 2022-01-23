@@ -14,11 +14,19 @@ public class PlayerController2D : MonoBehaviour
 	}
 	private EPlayerState State;
 
+	private class PrevSwingPoint
+	{
+		public Vector2 WorldPosition;
+		public bool WrappedCW;
+		public float Angle;
+	}
+
 	private class PlayerSwingInfo
 	{
 		public bool AttachPointValid = false;
+		public bool SwingingCW = false;
 		public Vector2 WorldAttachPoint = Vector2.zero;
-		public List<Vector2> PreviousAttachPoints = new List<Vector2>();
+		public List<PrevSwingPoint> PreviousAttachPoints = new List<PrevSwingPoint>();
 	}
 	private PlayerSwingInfo SwingInfo = new PlayerSwingInfo();
 
@@ -215,6 +223,8 @@ public class PlayerController2D : MonoBehaviour
 			RaycastHit2D[] rayHits = new RaycastHit2D[10];
 			ContactFilter2D filter = new ContactFilter2D();
 			Vector2 toSwingPoint = SwingInfo.WorldAttachPoint - new Vector2(transform.position.x, transform.position.y);
+			SwingInfo.SwingingCW = Vector3.Cross(toSwingPoint, Rbody.velocity).z < 0.0f;
+			Debug.Log($"{SwingInfo.SwingingCW}");
 			int numHits = Physics2D.Raycast(transform.position, toSwingPoint.normalized, filter, rayHits, toSwingPoint.magnitude + 0.01f);
 			bool wrapped = false;
 			for (int i = 0; i < numHits; ++i)
@@ -224,7 +234,11 @@ public class PlayerController2D : MonoBehaviour
 					if ((rayHits[i].point - SwingInfo.WorldAttachPoint).magnitude > 0.01f)
 					{
 						// The player no longer has direct line-of-sight to the swing point, so we need to wrap
-						SwingInfo.PreviousAttachPoints.Add(SwingInfo.WorldAttachPoint);
+						PrevSwingPoint wrapInfo = new PrevSwingPoint();
+						wrapInfo.WorldPosition = SwingInfo.WorldAttachPoint;
+						wrapInfo.WrappedCW = SwingInfo.SwingingCW;
+						wrapInfo.Angle = Mathf.Atan2(toSwingPoint.y, toSwingPoint.x);
+						SwingInfo.PreviousAttachPoints.Add(wrapInfo);
 						// TODO: This isn't actually the exact wrapping point; that should be set to the collider vertex
 						// (however it should be pretty close to the exact point in general)
 						SwingInfo.WorldAttachPoint = rayHits[i].point;
@@ -237,21 +251,17 @@ public class PlayerController2D : MonoBehaviour
 			// Simulate unwrapping
 			if (!wrapped && SwingInfo.PreviousAttachPoints.Count > 0)
 			{
-				Vector2 prevPoint = SwingInfo.PreviousAttachPoints[SwingInfo.PreviousAttachPoints.Count - 1];
-				toSwingPoint = prevPoint - new Vector2(transform.position.x, transform.position.y);
-				numHits = Physics2D.Raycast(transform.position, toSwingPoint.normalized, filter, rayHits, toSwingPoint.magnitude + 0.01f);
-				for (int i = 0; i < numHits; ++i)
+				PrevSwingPoint prevPoint = SwingInfo.PreviousAttachPoints[SwingInfo.PreviousAttachPoints.Count - 1];
+				if (SwingInfo.SwingingCW != prevPoint.WrappedCW)
 				{
-					if (rayHits[i].collider.gameObject != gameObject && !rayHits[i].collider.isTrigger)
+					toSwingPoint = prevPoint.WorldPosition - new Vector2(transform.position.x, transform.position.y);
+					//float angle = Vector2.Angle(Vector2.up, toSwingPoint);
+					float angle = Mathf.Atan2(toSwingPoint.y, toSwingPoint.x);
+					if (prevPoint.WrappedCW ? (angle < prevPoint.Angle) : (angle > prevPoint.Angle))
 					{
-						if ((rayHits[i].point - prevPoint).magnitude <= 0.01f)
-						{
-							// The player now has line-of-sight to the previous swing point, so we unwrap
-							SwingInfo.PreviousAttachPoints.RemoveAt(SwingInfo.PreviousAttachPoints.Count - 1);
-							SwingInfo.WorldAttachPoint = prevPoint;
-							PushSwingJointPivot();
-						}
-						break;
+						// The player has come back into alignment with the previous swinging point, so we unwrap
+						SwingInfo.WorldAttachPoint = prevPoint.WorldPosition;
+						SwingInfo.PreviousAttachPoints.RemoveAt(SwingInfo.PreviousAttachPoints.Count - 1);
 					}
 				}
 			}
@@ -349,7 +359,7 @@ public class PlayerController2D : MonoBehaviour
 			LineRenderComp.positionCount = SwingInfo.PreviousAttachPoints.Count + 2;
 			for (int i = 0; i < SwingInfo.PreviousAttachPoints.Count; ++i)
 			{
-				LineRenderComp.SetPosition(i, SwingInfo.PreviousAttachPoints[i]);
+				LineRenderComp.SetPosition(i, SwingInfo.PreviousAttachPoints[i].WorldPosition);
 			}
 			LineRenderComp.SetPosition(SwingInfo.PreviousAttachPoints.Count, SwingInfo.WorldAttachPoint);
 			LineRenderComp.SetPosition(SwingInfo.PreviousAttachPoints.Count + 1, gameObject.transform.position);
@@ -393,7 +403,7 @@ public class PlayerController2D : MonoBehaviour
 		if (SwingInfo.AttachPointValid)
 		{
 			SwingPointMarker.enabled = true;
-			Vector2 renderPoint = (SwingInfo.PreviousAttachPoints.Count > 0) ? SwingInfo.PreviousAttachPoints[0] : SwingInfo.WorldAttachPoint;
+			Vector2 renderPoint = (SwingInfo.PreviousAttachPoints.Count > 0) ? SwingInfo.PreviousAttachPoints[0].WorldPosition : SwingInfo.WorldAttachPoint;
 			SwingPointMarker.transform.position = new Vector3(renderPoint.x, renderPoint.y, 0.0f);
 		}
 		else

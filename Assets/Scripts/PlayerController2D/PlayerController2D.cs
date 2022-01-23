@@ -267,7 +267,7 @@ public class PlayerController2D : MonoBehaviour
 		}
 
 		// Detect grounded state and transition appropriately
-		bool isGrounded = GetIsGrounded();
+		bool isGrounded = GetIsGrounded() && !IsJumpingUp;
 		if (isGrounded != (State == EPlayerState.Grounded))
 		{
 			if (isGrounded)
@@ -284,7 +284,8 @@ public class PlayerController2D : MonoBehaviour
 				// Track some safe position to reset to on death
 				LastGroundPosition = transform.position;
 				NumJumpsRemaining = NumJumps;
-				Rbody.gravityScale = 1.0f;
+				//Rbody.gravityScale = 1.0f;
+				Rbody.gravityScale = 0.0f;
 			}
 			else
 			{
@@ -294,6 +295,7 @@ public class PlayerController2D : MonoBehaviour
 					// Remove the "first jump" if the player runs off a ledge
 					--NumJumpsRemaining;
 				}
+				Rbody.gravityScale = 1.0f;
 			}
 		}
 
@@ -306,7 +308,7 @@ public class PlayerController2D : MonoBehaviour
 		float maxSpeed = isGrounded ? MaxGroundSpeed : MaxAirSpeed;
 		float dragSpeedChange;
 		// Only apply drag when the user isn't trying to accelerate
-		if (horizSpeed == 0.0f || (Mathf.Abs(MoveInputDir.x) > 0.001f && (MoveInputDir.x > 0.0f) == (signedHorizSpeed > 0.0f)))
+		if (horizSpeed == 0.0f || (Mathf.Abs(MoveInputDir.x) > 0.001f && Mathf.Sign(MoveInputDir.x) == Mathf.Sign(signedHorizSpeed)))
 		{
 			dragSpeedChange = 0.0f;
 		}
@@ -321,7 +323,7 @@ public class PlayerController2D : MonoBehaviour
 		{
 			signedHorizSpeed = 0.0f;
 		}
-		else if (horizSpeed > maxSpeed)
+		else if (horizSpeed > maxSpeed + dragSpeedChange)
 		{
 			signedHorizSpeed = Mathf.Sign(signedHorizSpeed) * maxSpeed;
 		}

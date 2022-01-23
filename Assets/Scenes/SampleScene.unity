@@ -3105,7 +3105,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SwingPointMarker: {fileID: 2085534992}
-  MoveAcceleration: 500
+  MoveAcceleration: 1000
   MaxGroundSpeed: 200
   MaxAirSpeed: 250
   GroundDragAcceleration: 500

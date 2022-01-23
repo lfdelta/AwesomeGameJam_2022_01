@@ -9,7 +9,6 @@ public class TreasurePickup : MonoBehaviour
 	{
 		if (other.GetComponent<PlayerController2D>() != null)
 		{
-			Debug.Log("Player picked up treasure");
 			GlobalManager mgr = FindObjectOfType<GlobalManager>();
 			if (mgr != null)
 			{

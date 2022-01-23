@@ -116,6 +116,8 @@ public class PlayerController2D : MonoBehaviour
 		float signedHorizSpeed = Vector2.Dot(Rbody.velocity, rightVelNormal);
 		Rbody.velocity = (signedHorizSpeed * rightVelNormal) + new Vector2(0.0f, JumpVelocity);
 		Rbody.gravityScale = JumpHoldGravityScale;
+		AudioManager audio = FindObjectOfType<AudioManager>();
+		audio.PlaySound(NumJumpsRemaining == NumJumps ? audio.Jump : audio.DoubleJump);
 		--NumJumpsRemaining;
 	}
 

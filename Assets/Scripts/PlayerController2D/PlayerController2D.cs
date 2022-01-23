@@ -147,16 +147,45 @@ public class PlayerController2D : MonoBehaviour
 
 	private bool GetIsGrounded()
 	{
-		Vector2 colliderBottom = ColliderObj.bounds.center;
-		colliderBottom.y -= ColliderObj.bounds.extents.y;
+		// By default, raycast from the bottom of the collider
+		Vector2 castOrigin = ColliderObj.bounds.center;
+		castOrigin.y -= ColliderObj.bounds.extents.y;
+		float castDist = GroundRaycastDist;
+		Vector2[] castDirs;
+
+		CapsuleCollider2D capsule = (CapsuleCollider2D)ColliderObj;
+		if (capsule == null)
+		{
+			// Only check straight down
+			castDirs = new[] { Vector2.down };
+		}
+		else
+		{
+			// Cast in various directions, from the center of the lower hemisphere, to detect collisions with slopes
+			float capsuleRadius = capsule.size.x;
+			castOrigin.y += capsuleRadius;
+			castDist += capsuleRadius;
+			castDirs = new[] { Vector2.down, (Vector2.down + Vector2.left).normalized, (Vector2.down + Vector2.right).normalized };
+		}
+
 		RaycastHit2D[] rayHits = new RaycastHit2D[10];
 		ContactFilter2D filter = new ContactFilter2D();
-		int numHits = Physics2D.Raycast(colliderBottom, Vector2.down, filter, rayHits, GroundRaycastDist);
-		for (int i = 0; i < numHits; ++i)
+		int numHits;
+		foreach (Vector2 castDir in castDirs)
 		{
-			if (rayHits[i].collider.gameObject != gameObject && !rayHits[i].collider.isTrigger)
+			numHits = Physics2D.Raycast(castOrigin, castDir, filter, rayHits, castDist);
+			for (int i = 0; i < numHits; ++i)
 			{
-				return true;
+				if (rayHits[i].collider.gameObject != gameObject && !rayHits[i].collider.isTrigger)
+				{
+					// Allow slopes just steeper than 45 degrees
+					if (rayHits[i].normal.y > 0.7f)
+					{
+						//LastGroundNormal = rayHits[i].normal;
+						return true;
+					}
+					return false;
+				}
 			}
 		}
 		return false;

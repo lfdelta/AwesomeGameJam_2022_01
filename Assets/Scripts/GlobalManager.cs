@@ -69,6 +69,13 @@ public class GlobalManager : MonoBehaviour
 			}
 		}
 		AudioManager audio = FindObjectOfType<AudioManager>();
-		audio.PlaySound(allTreasuresCollected ? audio.AllTreasuresCollected : audio.TreasureDropoff);
+		if (allTreasuresCollected)
+		{
+			audio.PlaySound(audio.AllTreasuresCollected, 0.3f);
+		}
+		else
+		{
+			audio.PlaySound(audio.TreasureDropoff);
+		}
 	}
 }

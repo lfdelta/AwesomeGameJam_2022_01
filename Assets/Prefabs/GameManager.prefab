@@ -175,6 +175,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb273d55e1853424a92a11f3f75c9ba5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Music: {fileID: 8300000, guid: e04df2650cc764ef785dc62e54153f87, type: 3}
   Jump: {fileID: 8300000, guid: fe626a9e128d8437fb131aefa5dae4d7, type: 3}
   DoubleJump: {fileID: 8300000, guid: 6cf139bb2f8ef442394537871f10f248, type: 3}
   Land: {fileID: 8300000, guid: 184ef4c9e3f3a4fb29d9441729e050d7, type: 3}

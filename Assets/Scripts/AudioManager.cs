@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
+	public AudioClip Music;
 	public AudioClip Jump;
 	public AudioClip DoubleJump;
 	public AudioClip Land;
@@ -20,10 +21,11 @@ public class AudioManager : MonoBehaviour
 	private void Start()
 	{
 		Source = gameObject.AddComponent<AudioSource>();
+		PlaySound(Music, 0.3f);
 	}
 
-	public void PlaySound(AudioClip Sound)
+	public void PlaySound(AudioClip Sound, float Volume = 1.0f)
 	{
-		Source.PlayOneShot(Sound);
+		Source.PlayOneShot(Sound, Volume);
 	}
 }

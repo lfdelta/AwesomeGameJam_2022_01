@@ -17,16 +17,21 @@ public class AudioManager : MonoBehaviour
 	public AudioClip TreasureDropoff;
 	public AudioClip AllTreasuresCollected;
 
-	private AudioSource Source;
+	private AudioSource AmbientSource;
+	private AudioSource SFXSource;
 
 	private void Start()
 	{
-		Source = gameObject.AddComponent<AudioSource>();
-		PlaySound(Music, MusicVolume);
+		SFXSource = gameObject.AddComponent<AudioSource>();
+		AmbientSource = gameObject.AddComponent<AudioSource>();
+
+		AmbientSource.loop = true;
+		AmbientSource.clip = Music;
+		AmbientSource.Play();
 	}
 
 	public void PlaySound(AudioClip Sound, float Volume = 1.0f)
 	{
-		Source.PlayOneShot(Sound, Volume);
+		SFXSource.PlayOneShot(Sound, Volume);
 	}
 }
